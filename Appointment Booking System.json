@@ -1,0 +1,233 @@
+{
+  "name": "Appointment Booking System",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "46c00f05-bff8-4fda-a659-fb0e9dd1852b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d99a8dec-e7ac-40e9-9bf1-b325446b421b",
+              "name": "customer_name",
+              "value": "Aman khan",
+              "type": "string"
+            },
+            {
+              "id": "d2eeb240-2c19-4423-a3f8-6cf6f779a992",
+              "name": "appointment_date",
+              "value": "2026-08-10",
+              "type": "string"
+            },
+            {
+              "id": "91edeaf5-ec60-40d0-81f2-3a5641e2602a",
+              "name": "appointment_time",
+              "value": "16:00",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "bc6d2658-8e17-47e1-9c3b-9cd85327cc28",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "aman558926@gmail.com",
+          "mode": "list",
+          "cachedResultName": "aman558926@gmail.com"
+        },
+        "timeMin": "={{ DateTime.fromISO($json.appointment_date + 'T' + $json.appointment_time) }}",
+        "timeMax": "={{ DateTime.fromISO($json.appointment_date + 'T' + $json.appointment_time).plus({ hours: 1 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f4e60346-b86b-4dc0-bdb8-c6729658600d",
+      "name": "Get many events",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "nxUyxIbd6o92PXDd",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3959f845-26c2-47ff-9b92-e5577c91ac79",
+              "leftValue": "={{ Object.keys($json).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "44674314-9acb-4a38-afeb-ef854b6f9a6b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "aman558926@gmail.com",
+          "mode": "list",
+          "cachedResultName": "aman558926@gmail.com"
+        },
+        "start": "={{ DateTime.fromISO($('Edit Fields').item.json.appointment_date + 'T' + $('Edit Fields').item.json.appointment_time) }}",
+        "end": "={{ DateTime.fromISO($('Edit Fields').item.json.appointment_date + 'T' + $('Edit Fields').item.json.appointment_time).plus({ hours: 1 }) }}",
+        "additionalFields": {
+          "summary": "={{ $('Edit Fields').item.json.customer_name }} - Appointment"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "76042c88-d4a0-439a-8e94-e030ba8bb3ae",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "nxUyxIbd6o92PXDd",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "275f6a95-b782-44bc-8bdd-087a349306b4",
+              "name": "message",
+              "value": "\"slot not available, please choose another time\"",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        96
+      ],
+      "id": "654953b2-c237-4bbc-b0f2-1cb01afc4bf7",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8565a607-6847-4c93-bc47-f17dc6f14cb3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b16438f171cdb5b80695fc0ae489e8a8e73a063371b31ec438e799872b89023d"
+  },
+  "nodeGroups": [],
+  "id": "slN4bDPZn6fhtZ8Q",
+  "tags": []
+}
